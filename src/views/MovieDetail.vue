@@ -1,35 +1,41 @@
 <template>
-  <div class="movie-detail">
-    <h2>{{movie.Title}}</h2>
-    <p>{{ movie.Year }}</p>
-    <img :src="movie.Poster" alt="Movie Poster" class="featured-img" />
-    <p>{{ movie.Plot }}</p>
+  <div v-if="loading">Loading ...</div>
+  <div v-else>
+    <div class="movie-detail">
+      <h2>{{ movie.Title }}</h2>
+      <p>{{ movie.Year }}</p>
+      <img :src="movie.Poster" alt="Movie Poster" class="featured-img" />
+      <p>{{ movie.Plot }}</p>
+    </div>
   </div>
 </template>
 
 <script>
-import { ref, onBeforeMount } from 'vue';
-import { useRoute } from 'vue-router';
-import env from '../env.js';
+import { ref, onBeforeMount } from "vue";
+import { useRoute } from "vue-router";
+import env from "../env.js";
 
 export default {
-  setup () {
+  setup() {
     const movie = ref({});
+    const loading = ref(true);
     const route = useRoute();
 
     onBeforeMount(() => {
       fetch(`${env.url}/?apikey=${env.apikey}&i=${route.params.id}&plot=full`)
-        .then(response => response.json())
-        .then(data => {
+        .then((response) => response.json())
+        .then((data) => {
           movie.value = data;
+          loading.value = false;
         });
     });
 
     return {
-      movie
-    }
-  }
-}
+      movie,
+      loading,
+    };
+  },
+};
 </script>
 
 <style lang="scss">
@@ -37,7 +43,7 @@ export default {
   padding: 16px;
 
   h2 {
-    color: #FFF;
+    color: #fff;
     font-size: 28px;
     font-weight: 600;
     margin-bottom: 16px;
@@ -50,7 +56,7 @@ export default {
   }
 
   p {
-    color: #FFF;
+    color: #fff;
     font-size: 18px;
     line-height: 1.4;
   }

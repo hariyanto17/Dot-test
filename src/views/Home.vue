@@ -10,7 +10,8 @@
         <div class="detail">
           <h3>Fast and Furious 9</h3>
           <p>
-            Cipher enlists the help of Jakob, Dom's younger brother to take revenge on Dom and his team.
+            Cipher enlists the help of Jakob, Dom's younger brother to take
+            revenge on Dom and his team.
           </p>
         </div>
       </router-link>
@@ -25,32 +26,43 @@
       <button type="submit" value="Search">Search</button>
     </form>
 
-    <div class="movies-list">
-      <div class="movie" v-for="movie in movies" :key="movie.imdbID">
-        <router-link :to="'/movie/' + movie.imdbID" class="movie-link">
-          <div class="product-image">
-            <img :src="movie.Poster" alt="Movie Poster" />
-            <div class="type">{{ movie.Type }}</div>
-          </div>
-          <div class="detail">
-            <p class="year">{{ movie.Year }}</p>
-            <h3>{{ movie.Title }}</h3>
-          </div>
-        </router-link>
-      </div>
+    <div class="movies-list" v-if="initial">
+      <card-movie
+        v-for="naruto in narutos"
+        :key="naruto.imdbID"
+        :movie="naruto"
+      ></card-movie>
+    </div>
+    <div class="movies-list" v-else>
+      <card-movie
+        v-for="movie in movies"
+        :key="movie.imdbID"
+        :movie="movie"
+      ></card-movie>
     </div>
   </div>
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, onBeforeMount } from "vue";
 import env from "../env.js";
+import CardMovie from "../components/CardMovie.vue";
 
 export default {
   setup() {
     const search = ref("");
     const movies = ref([]);
+    const narutos = ref([]);
+    const initial = ref(true);
 
+    onBeforeMount(() => {
+      fetch(`${env.url}/?apikey=${env.apikey}&s=naruto`)
+        .then((response) => response.json())
+        .then((data) => {
+          narutos.value = data.Search;
+          console.log(`data`, data);
+        });
+    });
     const SearchMovies = () => {
       if (search.value != "") {
         fetch(`${env.url}/?apikey=${env.apikey}&s=${search.value}`)
@@ -58,6 +70,7 @@ export default {
           .then((data) => {
             movies.value = data.Search;
             search.value = "";
+            initial.value = false;
           });
       }
     };
@@ -66,8 +79,11 @@ export default {
       search,
       movies,
       SearchMovies,
+      initial,
+      narutos,
     };
   },
+  components: { CardMovie },
 };
 </script>
 
@@ -157,58 +173,6 @@ export default {
     display: flex;
     flex-wrap: wrap;
     margin: 0px 8px;
-
-    .movie {
-      max-width: 50%;
-      flex: 1 1 50%;
-      padding: 16px 8px;
-
-      .movie-link {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-
-        .product-image {
-          position: relative;
-          display: block;
-
-          img {
-            display: block;
-            width: 100%;
-            height: 275px;
-            object-fit: cover;
-          }
-
-          .type {
-            position: absolute;
-            padding: 8px 16px;
-            background-color: #42b883;
-            color: #fff;
-            bottom: 16px;
-            left: 0px;
-            text-transform: capitalize;
-          }
-        }
-
-        .detail {
-          background-color: #496583;
-          padding: 16px 8px;
-          flex: 1 1 100%;
-          border-radius: 0px 0px 8px 8px;
-
-          .year {
-            color: #aaa;
-            font-size: 14px;
-          }
-
-          h3 {
-            color: #fff;
-            font-weight: 600;
-            font-size: 18px;
-          }
-        }
-      }
-    }
   }
 }
 </style>
